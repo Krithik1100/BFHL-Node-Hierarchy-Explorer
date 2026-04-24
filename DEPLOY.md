@@ -4,7 +4,7 @@ This file contains PowerShell-friendly, copy-pasteable steps to deploy the API (
 
 Pre-reqs
 - A GitHub repo (create one and push this project). We'll assume the remote is named `origin` and the main branch is `main`.
-- Replace identity placeholders in `server/index.js` if needed (USER_ID, EMAIL_ID, COLLEGE_ROLL_NUMBER).
+- Identity is configured in `server/src/bfhl/bfhl.service.ts`.
 
 1) Prepare the repo (PowerShell)
 
@@ -23,7 +23,8 @@ git push -u origin main
 
  - Go to https://render.com and create a new Web Service.
  - Connect your GitHub account and pick the repository/branch you pushed.
- - Set the "Root Directory" to `server` (or use the `render.yaml` root field).
+ - Set the "Root Directory" to `server` (or use `render.yaml`).
+ - Set the Build Command to `npm install && npm run build`.
  - Set the Start Command to `npm start`.
  - Set any environment variables if you want; otherwise Render will use the defaults.
  - Deploy and note the public URL (e.g. `https://bfhl-api.onrender.com`).
@@ -40,7 +41,7 @@ git push -u origin main
  - Open the deployed frontend in Netlify and update the "API Base URL" field to your Render API URL (e.g. `https://bfhl-api.onrender.com`).
 
 Troubleshooting
-- If CORS errors occur, ensure `cors` is enabled (server/index.js already uses it).
+- If CORS errors occur, ensure Nest CORS remains enabled in `server/src/main.ts`.
 - If the API returns 404, check Render logs to ensure the server started and `PORT` is honored.
 
 If you want, I can:

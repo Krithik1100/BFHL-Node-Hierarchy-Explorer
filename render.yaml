@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: bfhl-api
-    env: node
-    branch: main
-    buildCommand: "npm install"
-    startCommand: "npm start"
-    root: server
+    name: bajaj-test-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: free
+    autoDeploy: true

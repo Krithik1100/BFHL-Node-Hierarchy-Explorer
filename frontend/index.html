@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BFHL — Node Hierarchy Explorer</title>
+<title>BFHL - Krithik Kumar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -30,7 +30,6 @@
     overflow-x: hidden;
   }
 
-  /* animated bg grid */
   body::before {
     content: '';
     position: fixed;
@@ -101,7 +100,6 @@
     main { grid-template-columns: 1fr; }
   }
 
-  /* ── Left Panel ── */
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -234,7 +232,6 @@
   }
   .example-chip:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* ── Right Panel / Results ── */
   .results-wrap { display: flex; flex-direction: column; gap: 20px; }
 
   .result-section {
@@ -269,7 +266,6 @@
     background: rgba(255,255,255,.05);
   }
 
-  /* identity cards */
   .identity-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -283,7 +279,6 @@
   .id-card .label { font-size: 10px; font-family: var(--mono); color: var(--muted); letter-spacing: .5px; margin-bottom: 4px; }
   .id-card .value { font-size: 14px; font-weight: 600; color: var(--accent); font-family: var(--mono); word-break: break-all; }
 
-  /* summary */
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -307,7 +302,6 @@
   .stat-card .num.root   { color: var(--accent); font-size: 28px; }
   .stat-card .lbl { font-size: 11px; font-family: var(--mono); color: var(--muted); }
 
-  /* hierarchies */
   .trees-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -352,7 +346,6 @@
   .sub .depth-tag { color: var(--accent3); }
   .sub .cycle-tag { color: var(--accent2); }
 
-  /* tree visualisation */
   .tree-visual {
     font-family: var(--mono);
     font-size: 12px;
@@ -372,7 +365,6 @@
   }
   .tree-visual .node-name:hover { background: rgba(0,229,255,.15); }
 
-  /* badges for invalid/dupes */
   .badge-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px; }
   .badge {
     padding: 5px 12px;
@@ -384,7 +376,6 @@
   .badge.dupe    { background: rgba(255,200,100,.1); color: #ffc864;       border: 1px solid rgba(255,200,100,.2); }
   .empty-badge   { padding: 16px 20px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
 
-  /* raw JSON toggle */
   .raw-toggle {
     padding: 12px 20px;
     border-top: 1px solid var(--border);
@@ -417,7 +408,6 @@
     word-break: break-all;
   }
 
-  /* error */
   .error-box {
     background: rgba(255,79,135,.07);
     border: 1px solid rgba(255,79,135,.25);
@@ -433,7 +423,6 @@
   }
   .error-box .icon { font-size: 20px; flex-shrink: 0; }
 
-  /* loader */
   .loader {
     display: flex;
     align-items: center;
@@ -454,7 +443,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* empty state */
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -477,15 +465,15 @@
 <body>
 
 <header>
-  <div class="logo-badge">B→</div>
+  <div class="logo-badge">BF</div>
   <div class="header-text">
     <h1>BFHL <span>Node Hierarchy</span> Explorer</h1>
+    <p>krithik_kumar_26012006 · RA2311026020062 · krithikkumar2006@gmail.com</p>
   </div>
   
 </header>
 
 <main>
-  <!-- ── Left: Input Panel ── -->
   <aside>
     <div class="panel">
       <div class="panel-header">
@@ -493,9 +481,6 @@
         Input
       </div>
       <div class="panel-body">
-        <label>API BASE URL</label>
-        <input class="api-url-field" id="apiUrl" type="text" value="http://localhost:3001" placeholder="https://your-api.onrender.com" />
-
         <label>NODE EDGES (comma or newline separated)</label>
         <textarea id="inputData" placeholder='A->B, A->C, B->D&#10;X->Y, Y->Z, Z->X&#10;hello, 1->2'></textarea>
         <p class="hint">Format: <span>X->Y</span> — single uppercase letters only.<br>
@@ -517,7 +502,6 @@
     </div>
   </aside>
 
-  <!-- ── Right: Results Panel ── -->
   <section class="results-wrap" id="results">
     <div class="result-section">
       <div style="display:none" id="emptyPlaceholder"></div>
@@ -531,15 +515,13 @@
 
 <script>
 const EXAMPLES = [
-  // 0 Simple tree
   'A->B, A->C, B->D, C->E',
-  // 1 With cycle
   'A->B, B->C, X->Y, Y->Z, Z->X',
-  // 2 Full demo from spec
   'A->B, A->C, B->D, C->E, E->F, X->Y, Y->Z, Z->X, P->Q, Q->R, G->H, G->H, G->I, hello, 1->2, A->',
-  // 3 Duplicates
   'A->B, A->B, A->B, A->C, B->D',
 ];
+
+const API_BASE_URL = 'http://localhost:3000';
 
 function loadExample(i) {
   document.getElementById('inputData').value = EXAMPLES[i];
@@ -580,12 +562,11 @@ function showError(msg) {
 
 async function handleSubmit() {
   const raw     = document.getElementById('inputData').value.trim();
-  const baseUrl = document.getElementById('apiUrl').value.trim().replace(/\/$/, '');
+  const baseUrl = API_BASE_URL;
   const btn     = document.getElementById('submitBtn');
 
   if (!raw) { alert('Enter at least one edge.'); return; }
 
-  // Parse: split by comma or newline, trim each
   const data = raw
     .split(/[\n,]+/)
     .map(s => s.trim())
@@ -616,26 +597,19 @@ async function handleSubmit() {
   }
 }
 
-// ── Rendering ──────────────────────────────────────────────────────────────
-
 function renderResults(d) {
   const wrap = document.getElementById('results');
   wrap.innerHTML = '';
 
-  // Identity
   wrap.appendChild(buildIdentity(d));
 
-  // Summary
   wrap.appendChild(buildSummary(d.summary));
 
-  // Hierarchies
   wrap.appendChild(buildHierarchies(d.hierarchies));
 
-  // Invalid + Dupes
   wrap.appendChild(buildBadges('INVALID ENTRIES', d.invalid_entries, 'invalid'));
   wrap.appendChild(buildBadges('DUPLICATE EDGES', d.duplicate_edges, 'dupe'));
 
-  // Raw JSON (collapsed)
   wrap.appendChild(buildRaw(d));
 }
 
@@ -702,7 +676,6 @@ function buildHierarchies(list = []) {
 
   sec.appendChild(grid);
 
-  // Render tree visuals after DOM append (need real elements)
   requestAnimationFrame(() => {
     list.forEach(h => {
       const el2 = document.getElementById(`tv-${h.root}`);
@@ -734,13 +707,11 @@ function renderTreeLines(treeObj, root) {
     });
   }
 
-  // Render root
   const rootLine = document.createElement('div');
   rootLine.className = 'node';
   rootLine.innerHTML = `<span class="node-name">${root}</span>`;
   frag.appendChild(rootLine);
 
-  // Render children
   walk(treeObj[root] || {}, '', true);
   return frag;
 }
@@ -804,7 +775,6 @@ function el(tag, cls = '') {
   return e;
 }
 
-// Allow Enter to submit from textarea with Ctrl/Cmd
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleSubmit();
 });

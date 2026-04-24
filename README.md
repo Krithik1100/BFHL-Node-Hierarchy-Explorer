@@ -1,91 +1,167 @@
-# BFHL — SRM Full Stack Engineering Challenge
+# BFHL Node Hierarchy Explorer
+
+This project is a small full-stack solution for the BFHL challenge. It takes a list of directed edges like `A->B`, validates them, builds hierarchy groups, detects cycles, reports duplicate or invalid entries, and shows the result in a simple browser UI.
+
+The backend is built with NestJS and exposes a `POST /bfhl` API. The frontend is a static HTML page that calls the API and renders the response in a readable way.
 
 ## Project Structure
-```
+
+```text
 bfhl-project/
-├── server/
-│   ├── index.js       ← Express API  (POST /bfhl)
-│   └── package.json
-└── frontend/
-    └── index.html     ← Single-page frontend
+|-- server/
+|   |-- src/
+|   |   |-- app.module.ts
+|   |   `-- bfhl/
+|   |       |-- bfhl.controller.ts
+|   |       |-- bfhl.module.ts
+|   |       `-- bfhl.service.ts
+|   |-- package.json
+|   `-- tsconfig.json
+|-- frontend/
+|   `-- index.html
+|-- render.yaml
+|-- netlify.toml
+`-- DEPLOY.md
 ```
 
----
+## Identity Used
 
-## ✅ Setup
+The API response includes the required student details:
 
-### 1. Fill in your identity (REQUIRED)
-
-Open `server/index.js` and edit lines 7–9:
-
-```js
-const USER_ID             = 'yourname_ddmmyyyy';      // e.g. johndoe_17091999
-const EMAIL_ID            = 'your.email@college.edu'; // your college email
-const COLLEGE_ROLL_NUMBER = 'XXCS0000';               // your roll number
+```ts
+user_id: "krithik_kumar_26012006"
+email_id: "krithikkumar2006@gmail.com"
+college_roll_number: "RA2311026020062"
 ```
 
----
+These values are configured in:
 
-### 2. Run the API locally
+```text
+server/src/bfhl/bfhl.service.ts
+```
+
+## Run Locally
+
+Install and start the backend:
 
 ```bash
 cd server
 npm install
-npm start          # runs on http://localhost:3001
+npm run build
+npm start
 ```
 
----
+The backend runs at:
 
-### 3. Open the frontend
+```text
+http://localhost:3000
+```
 
-Just open `frontend/index.html` in your browser (double-click or use Live Server).
+Open the frontend:
 
-Set the **API Base URL** field to `http://localhost:3001`.
+```text
+frontend/index.html
+```
 
----
+The API Base URL field should be:
 
-## 🚀 Deploying
+```text
+http://localhost:3000
+```
 
-### API → Render / Railway / Fly.io
+## API
 
-1. Push `server/` to GitHub
-2. Create a new Web Service on [Render](https://render.com)
-3. Set **Start Command** to `npm start`
-4. Deploy — note the public URL (e.g. `https://bfhl-api.onrender.com`)
+### Health Check
 
-### Frontend → Netlify / Vercel / GitHub Pages
+```http
+GET /
+```
 
-1. Push `frontend/` to GitHub
-2. Deploy as a static site
-3. In the deployed frontend, set API Base URL to your Render URL
-
----
-
-## API Reference
-
-**POST `/bfhl`**
+Example response:
 
 ```json
 {
-  "data": ["A->B", "A->C", "B->D", "X->Y", "Y->Z", "Z->X", "hello", "1->2"]
+  "status": "ok",
+  "service": "bfhl-backend"
 }
 ```
 
-Valid edge format: single uppercase letter `->` single uppercase letter.
+### Process Edges
 
----
+```http
+POST /bfhl
+```
 
-## Features implemented
+Request body:
 
-- ✅ Valid node format validation (regex `^[A-Z]->[A-Z]$`)
-- ✅ Self-loop detection (`A->A` → invalid)
-- ✅ Whitespace trimming before validation
-- ✅ Duplicate edge detection (first occurrence kept, rest in `duplicate_edges` once)
-- ✅ Multi-root forest support
-- ✅ Diamond/multi-parent: first-encountered parent wins
-- ✅ Cycle detection (DFS, directed)
-- ✅ Pure cycle: lexicographically smallest node as root
-- ✅ Depth calculation (longest root-to-leaf node count)
-- ✅ Summary: total_trees, total_cycles, largest_tree_root (with lex tiebreak)
-- ✅ CORS enabled
-- ✅ Responds in < 3s for 50 nodes
+```json
+{
+  "data": ["A->B", "A->C", "B->D", "A->B", "hello"]
+}
+```
+
+Example response:
+
+```json
+{
+  "is_success": true,
+  "user_id": "krithik_kumar_26012006",
+  "email_id": "krithikkumar2006@gmail.com",
+  "college_roll_number": "RA2311026020062",
+  "invalid_entries": ["hello"],
+  "duplicate_edges": ["A->B"],
+  "hierarchies": [
+    {
+      "root": "A",
+      "tree": {
+        "A": {
+          "B": {
+            "D": {}
+          },
+          "C": {}
+        }
+      },
+      "depth": 3
+    }
+  ],
+  "summary": {
+    "total_trees": 1,
+    "total_cycles": 0,
+    "largest_tree_root": "A"
+  }
+}
+```
+
+## What It Handles
+
+- Validates edge format as `X->Y`, where both nodes are single uppercase letters.
+- Rejects invalid values like `hello`, `1->2`, `A->`, and self-loops like `A->A`.
+- Tracks duplicate edges while keeping the first occurrence.
+- Builds separate hierarchy groups when the input has disconnected graphs.
+- Handles multi-parent cases by keeping the first parent found for a child.
+- Detects cycles and marks cyclic groups instead of forcing them into a tree.
+- Calculates tree depth and reports the deepest root in the summary.
+- Enables CORS so the static frontend can call the backend.
+
+## Deployment
+
+The repo includes:
+
+- `render.yaml` for deploying the NestJS backend on Render.
+- `netlify.toml` for deploying the static frontend on Netlify.
+
+Render should use:
+
+```text
+Root Directory: server
+Build Command: npm install && npm run build
+Start Command: npm start
+```
+
+Netlify should publish:
+
+```text
+frontend
+```
+
+After deployment, update the frontend's API Base URL field to the deployed backend URL.
