@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: bfhl-api
+    env: node
+    branch: main
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    root: server
