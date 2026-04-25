@@ -40,12 +40,18 @@ git push -u origin main
 
  - Open the deployed frontend in Netlify.
  - The "API Base URL" field no longer defaults to `http://localhost:3000` after deployment.
- - Update it to your Render API URL (e.g. `https://bfhl-api.onrender.com`).
+ - The deployed frontend defaults to this Render API URL:
+
+```text
+https://bfhl-node-hierarchy-explorer-0swc.onrender.com
+```
+
+ - If you create a new Render service later, update the "API Base URL" field to the new Render API URL.
  - The URL is automatically saved in your browser's localStorage for future visits.
  - You can also share a preconfigured link by adding the API URL as a query parameter:
 
 ```text
-https://your-netlify-site.netlify.app/?api=https://bfhl-api.onrender.com
+https://your-netlify-site.netlify.app/?api=https://bfhl-node-hierarchy-explorer-0swc.onrender.com
 ```
 
  - If the frontend and backend are deployed under the same domain, the frontend will automatically use that same origin.

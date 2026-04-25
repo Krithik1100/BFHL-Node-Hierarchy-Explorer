@@ -525,6 +525,7 @@ const EXAMPLES = [
 ];
 
 const LOCAL_API_URL = 'http://localhost:3000';
+const DEPLOYED_API_URL = 'https://bfhl-node-hierarchy-explorer-0swc.onrender.com';
 const apiUrlInput = document.getElementById('apiUrl');
 
 function normalizeApiUrl(url) {
@@ -552,7 +553,7 @@ function getDefaultApiUrl() {
   if (savedUrl && (isLocalPage || !savedIsLocalhost)) return savedUrl;
 
   if (savedIsLocalhost) localStorage.removeItem('bfhl_api_url');
-  return isLocalPage ? LOCAL_API_URL : window.location.origin;
+  return isLocalPage ? LOCAL_API_URL : DEPLOYED_API_URL;
 }
 
 apiUrlInput.value = getDefaultApiUrl();
