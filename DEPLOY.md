@@ -38,7 +38,17 @@ git push -u origin main
 
 4) Point the frontend to the API
 
- - Open the deployed frontend in Netlify and update the "API Base URL" field to your Render API URL (e.g. `https://bfhl-api.onrender.com`).
+ - Open the deployed frontend in Netlify.
+ - The "API Base URL" field no longer defaults to `http://localhost:3000` after deployment.
+ - Update it to your Render API URL (e.g. `https://bfhl-api.onrender.com`).
+ - The URL is automatically saved in your browser's localStorage for future visits.
+ - You can also share a preconfigured link by adding the API URL as a query parameter:
+
+```text
+https://your-netlify-site.netlify.app/?api=https://bfhl-api.onrender.com
+```
+
+ - If the frontend and backend are deployed under the same domain, the frontend will automatically use that same origin.
 
 Troubleshooting
 - If CORS errors occur, ensure Nest CORS remains enabled in `server/src/main.ts`.

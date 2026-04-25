@@ -481,6 +481,9 @@
         Input
       </div>
       <div class="panel-body">
+        <label>API BASE URL</label>
+        <input class="api-url-field" id="apiUrl" placeholder="https://your-api.onrender.com" />
+
         <label>NODE EDGES (comma or newline separated)</label>
         <textarea id="inputData" placeholder='A->B, A->C, B->D&#10;X->Y, Y->Z, Z->X&#10;hello, 1->2'></textarea>
         <p class="hint">Format: <span>X->Y</span> — single uppercase letters only.<br>
@@ -521,7 +524,41 @@ const EXAMPLES = [
   'A->B, A->B, A->B, A->C, B->D',
 ];
 
-const API_BASE_URL = 'http://localhost:3000';
+const LOCAL_API_URL = 'http://localhost:3000';
+const apiUrlInput = document.getElementById('apiUrl');
+
+function normalizeApiUrl(url) {
+  return (url || '').trim().replace(/\/+$/, '');
+}
+
+function getQueryApiUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return normalizeApiUrl(params.get('api') || params.get('apiUrl'));
+}
+
+function getDefaultApiUrl() {
+  const isLocalPage = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+  const configuredUrl = normalizeApiUrl(window.BFHL_API_URL);
+  if (configuredUrl) return configuredUrl;
+
+  const queryUrl = getQueryApiUrl();
+  if (queryUrl) {
+    localStorage.setItem('bfhl_api_url', queryUrl);
+    return queryUrl;
+  }
+
+  const savedUrl = normalizeApiUrl(localStorage.getItem('bfhl_api_url'));
+  const savedIsLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(savedUrl);
+  if (savedUrl && (isLocalPage || !savedIsLocalhost)) return savedUrl;
+
+  if (savedIsLocalhost) localStorage.removeItem('bfhl_api_url');
+  return isLocalPage ? LOCAL_API_URL : window.location.origin;
+}
+
+apiUrlInput.value = getDefaultApiUrl();
+apiUrlInput.addEventListener('change', () => {
+  localStorage.setItem('bfhl_api_url', normalizeApiUrl(apiUrlInput.value));
+});
 
 function loadExample(i) {
   document.getElementById('inputData').value = EXAMPLES[i];
@@ -562,7 +599,7 @@ function showError(msg) {
 
 async function handleSubmit() {
   const raw     = document.getElementById('inputData').value.trim();
-  const baseUrl = API_BASE_URL;
+  const baseUrl = normalizeApiUrl(apiUrlInput.value) || getDefaultApiUrl();
   const btn     = document.getElementById('submitBtn');
 
   if (!raw) { alert('Enter at least one edge.'); return; }
@@ -591,7 +628,15 @@ async function handleSubmit() {
     const json = await resp.json();
     renderResults(json);
   } catch (err) {
-    showError(`Could not reach the API at <code>${baseUrl}/bfhl</code>.<br/><br/>Make sure the server is running and CORS is enabled.<br/><br/><small>${err.message}</small>`);
+    const isLocalApi = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
+    const isLocalPage = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+    const deployedHint = isLocalApi && !isLocalPage
+      ? '<br/><br/>This deployed page is still pointing at a local API. Enter your deployed backend URL, for example <code>https://your-api.onrender.com</code>.'
+      : '';
+    const localHint = isLocalApi && isLocalPage
+      ? '<br/><br/>For local testing, start the backend with <code>npm.cmd run start:dev</code> inside the <code>server</code> folder.'
+      : '';
+    showError(`Could not reach the API at <code>${baseUrl}/bfhl</code>.<br/><br/>Make sure the server is running, the API URL is correct, and CORS is enabled.${deployedHint}${localHint}<br/><br/><small>${err.message}</small>`);
   } finally {
     btn.disabled = false;
   }
