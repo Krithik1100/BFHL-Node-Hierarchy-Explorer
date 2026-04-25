@@ -139,21 +139,6 @@
     letter-spacing: 0.5px;
   }
 
-  .api-url-field {
-    width: 100%;
-    background: rgba(0,0,0,.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--accent);
-    outline: none;
-    transition: border-color .2s;
-    margin-bottom: 18px;
-  }
-  .api-url-field:focus { border-color: var(--accent); }
-
   textarea {
     width: 100%;
     height: 220px;
@@ -499,9 +484,6 @@
         Input
       </div>
       <div class="panel-body">
-        <label>API BASE URL</label>
-        <input class="api-url-field" id="apiUrl" placeholder="https://your-api.onrender.com" />
-
         <label>NODE EDGES (comma or newline separated)</label>
         <textarea id="inputData" placeholder='A->B, A->C, B->D&#10;X->Y, Y->Z, Z->X&#10;hello, 1->2'></textarea>
         <p class="hint">Format: <span>X->Y</span> — single uppercase letters only.<br>
@@ -544,7 +526,7 @@ const EXAMPLES = [
 
 const LOCAL_API_URL = 'http://localhost:3000';
 const DEPLOYED_API_URL = 'https://bfhl-node-hierarchy-explorer-0swc.onrender.com';
-const apiUrlInput = document.getElementById('apiUrl');
+let apiBaseUrl = '';
 
 function normalizeApiUrl(url) {
   return (url || '').trim().replace(/\/+$/, '');
@@ -574,10 +556,7 @@ function getDefaultApiUrl() {
   return isLocalPage ? LOCAL_API_URL : DEPLOYED_API_URL;
 }
 
-apiUrlInput.value = getDefaultApiUrl();
-apiUrlInput.addEventListener('change', () => {
-  localStorage.setItem('bfhl_api_url', normalizeApiUrl(apiUrlInput.value));
-});
+apiBaseUrl = getDefaultApiUrl();
 
 function loadExample(i) {
   document.getElementById('inputData').value = EXAMPLES[i];
@@ -618,7 +597,7 @@ function showError(msg) {
 
 async function handleSubmit() {
   const raw     = document.getElementById('inputData').value.trim();
-  const baseUrl = normalizeApiUrl(apiUrlInput.value) || getDefaultApiUrl();
+  const baseUrl = normalizeApiUrl(apiBaseUrl) || getDefaultApiUrl();
   const btn     = document.getElementById('submitBtn');
 
   if (!raw) { alert('Enter at least one edge.'); return; }
@@ -650,12 +629,12 @@ async function handleSubmit() {
     const isLocalApi = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
     const isLocalPage = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
     const deployedHint = isLocalApi && !isLocalPage
-      ? '<br/><br/>This deployed page is still pointing at a local API. Enter your deployed backend URL, for example <code>https://your-api.onrender.com</code>.'
+      ? '<br/><br/>This deployed page is still pointing at a local API. Configure the deployed backend URL before retrying.'
       : '';
     const localHint = isLocalApi && isLocalPage
       ? '<br/><br/>For local testing, start the backend with <code>npm.cmd run start:dev</code> inside the <code>server</code> folder.'
       : '';
-    showError(`Could not reach the API at <code>${baseUrl}/bfhl</code>.<br/><br/>Make sure the server is running, the API URL is correct, and CORS is enabled.${deployedHint}${localHint}<br/><br/><small>${err.message}</small>`);
+    showError(`Could not reach the API.<br/><br/>Make sure the server is running and CORS is enabled.${deployedHint}${localHint}<br/><br/><small>${err.message}</small>`);
   } finally {
     btn.disabled = false;
   }
