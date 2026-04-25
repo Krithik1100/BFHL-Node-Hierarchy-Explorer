@@ -350,6 +350,10 @@
   }
   .sub .depth-tag { color: var(--accent3); }
   .sub .cycle-tag { color: var(--accent2); }
+  .cycle-message {
+    color: var(--accent2);
+    font-size: 11px;
+  }
 
   .tree-visual {
     font-family: var(--mono);
@@ -725,7 +729,7 @@ function buildHierarchies(list = []) {
           <div class="root-label">Root: ${h.root}</div>
           <div class="sub">
             ${!isCycle ? `<span class="depth-tag">depth ${h.depth}</span>` : ''}
-            ${isCycle  ? `<span class="cycle-tag">⟳ cycle</span>`         : ''}
+            ${isCycle  ? `<span class="cycle-tag">cycle detected</span>`  : ''}
           </div>
         </div>
       </div>
@@ -742,7 +746,7 @@ function buildHierarchies(list = []) {
       const el2 = document.getElementById(`tv-${h.root}`);
       if (!el2) return;
       if (h.has_cycle) {
-        el2.innerHTML = `<span style="color:var(--accent2);font-size:11px;">∅ Cyclic — no tree structure</span>`;
+        el2.innerHTML = `<span class="cycle-message">Cyclic group: no tree structure</span>`;
       } else {
         el2.appendChild(renderTreeLines(h.tree, h.root));
       }
